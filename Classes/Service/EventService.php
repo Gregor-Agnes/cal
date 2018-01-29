@@ -621,6 +621,9 @@ class EventService extends \TYPO3\CMS\Cal\Service\BaseService
             $insertFields ['calendar_id'] = $this->conf ['rights.'] ['create.'] ['event.'] ['fields.'] ['calendar_id.'] ['default'];
         }
 
+        // for List in FE-Editing
+        $insertFields ['type'] = 0;
+
         $insertFields ['cruser_id'] = $this->rightsObj->getUserId();
         $insertFields ['fe_cruser_id'] = $this->rightsObj->getUserId();
 

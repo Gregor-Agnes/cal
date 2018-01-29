@@ -20,7 +20,7 @@ CREATE TABLE tx_cal_event (
 	title varchar(128) DEFAULT '' NOT NULL,
 	calendar_id int(11) unsigned DEFAULT '0' NOT NULL,
 	category_id int(11) unsigned DEFAULT '0' NOT NULL,
-	organizer varchar(128) DEFAULT '' NOT NULL,
+	organizer varchar(128) DEFAULT null NULL,
 	organizer_id int(11) unsigned DEFAULT '0' NOT NULL,
 	organizer_pid int(11) DEFAULT '0' NOT NULL,
 	organizer_link varchar(255) DEFAULT '' NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE tx_cal_event (
 	fe_cruser_id int(11) unsigned DEFAULT '0' NOT NULL,
 	fe_crgroup_id int(11) unsigned DEFAULT '0' NOT NULL,
 	shared_user_cnt int(11) unsigned DEFAULT '0' NOT NULL,
-	type tinyint(4) DEFAULT '0' NOT NULL,
+	type tinyint(4) DEFAULT null NULL,
 	page int(11) DEFAULT '0' NOT NULL,
 	ext_url tinytext NOT NULL,
 	isTemp tinyint(1) DEFAULT '0' NOT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE tx_cal_event (
 	t3ver_tstamp int(11) DEFAULT '0' NOT NULL,
 	t3ver_move_id int(11) DEFAULT '0' NOT NULL,
 	t3_origuid int(11) DEFAULT '0' NOT NULL,
-	
+
 	sys_language_uid int(11) DEFAULT '0' NOT NULL,
 	l18n_parent int(11) DEFAULT '0' NOT NULL,
 	l18n_diffsource mediumblob NOT NULL,
@@ -113,7 +113,7 @@ CREATE TABLE tx_cal_calendar (
 	bodystyle varchar(30) DEFAULT '' NOT NULL,
 	nearby tinyint(4) unsigned DEFAULT '0' NOT NULL,
 	schedulerId int(11) unsigned DEFAULT '0' NOT NULL,
-	
+
 	t3ver_oid int(11) DEFAULT '0' NOT NULL,
 	t3ver_id int(11) DEFAULT '0' NOT NULL,
 	t3ver_wsid int(11) DEFAULT '0' NOT NULL,
@@ -124,12 +124,12 @@ CREATE TABLE tx_cal_calendar (
 	t3ver_tstamp int(11) DEFAULT '0' NOT NULL,
 	t3ver_move_id int(11) DEFAULT '0' NOT NULL,
 	t3_origuid int(11) DEFAULT '0' NOT NULL,
-	
+
 	sys_language_uid int(11) DEFAULT '0' NOT NULL,
 	l18n_parent int(11) DEFAULT '0' NOT NULL,
 	l18n_diffsource mediumblob NOT NULL,
 	no_auto_pb tinyint(4) unsigned DEFAULT '0' NOT NULL,
-	
+
 	PRIMARY KEY (uid),
 	KEY parent (pid),
 	KEY t3ver_oid (t3ver_oid,t3ver_wsid),
@@ -180,7 +180,7 @@ CREATE TABLE tx_cal_category (
 	shared_user_allowed tinyint(4) unsigned DEFAULT '0' NOT NULL,
 	notification_emails text NOT NULL,
 	icon varchar(128) DEFAULT '' NOT NULL,
-	
+
 	t3ver_oid int(11) DEFAULT '0' NOT NULL,
 	t3ver_id int(11) DEFAULT '0' NOT NULL,
 	t3ver_wsid int(11) DEFAULT '0' NOT NULL,
@@ -196,7 +196,7 @@ CREATE TABLE tx_cal_category (
 	l18n_parent int(11) DEFAULT '0' NOT NULL,
 	l18n_diffsource mediumblob NOT NULL,
 	no_auto_pb tinyint(4) unsigned DEFAULT '0' NOT NULL,
-	
+
 	PRIMARY KEY (uid),
 	KEY parent (pid),
 	KEY t3ver_oid (t3ver_oid,t3ver_wsid),
@@ -245,7 +245,7 @@ CREATE TABLE tx_cal_unknown_users (
 	starttime int(11) unsigned DEFAULT '0' NOT NULL,
 	endtime int(11) unsigned DEFAULT '0' NOT NULL,
 	email varchar(128) DEFAULT '' NOT NULL,
-	
+
 	t3ver_oid int(11) DEFAULT '0' NOT NULL,
 	t3ver_id int(11) DEFAULT '0' NOT NULL,
 	t3ver_wsid int(11) DEFAULT '0' NOT NULL,
@@ -291,7 +291,7 @@ CREATE TABLE tx_cal_exception_event_group (
 	hidden tinyint(4) unsigned DEFAULT '0' NOT NULL,
 	title varchar(128) DEFAULT '' NOT NULL,
 	exception_event_cnt int(11) unsigned DEFAULT '0' NOT NULL,
-	
+
 	t3ver_oid int(11) DEFAULT '0' NOT NULL,
 	t3ver_id int(11) DEFAULT '0' NOT NULL,
 	t3ver_wsid int(11) DEFAULT '0' NOT NULL,
@@ -332,7 +332,7 @@ CREATE TABLE tx_cal_exception_event (
 	rdate text,
 	rdate_type varchar(10) DEFAULT 'none' NOT NULL,
 	monitor_cnt int(11) unsigned DEFAULT '0',
-	
+
 	t3ver_oid int(11) DEFAULT '0' NOT NULL,
 	t3ver_id int(11) DEFAULT '0' NOT NULL,
 	t3ver_wsid int(11) DEFAULT '0' NOT NULL,
@@ -374,7 +374,7 @@ CREATE TABLE tx_cal_organizer (
 	link varchar(255) DEFAULT '' NOT NULL,
 	fe_user_id int(11) unsigned DEFAULT '0' NOT NULL,
 	shared_user_cnt int(11) unsigned DEFAULT '0' NOT NULL,
-	
+
 	t3ver_oid int(11) DEFAULT '0' NOT NULL,
 	t3ver_id int(11) DEFAULT '0' NOT NULL,
 	t3ver_wsid int(11) DEFAULT '0' NOT NULL,
@@ -390,7 +390,7 @@ CREATE TABLE tx_cal_organizer (
 	l18n_parent int(11) DEFAULT '0' NOT NULL,
 	l18n_diffsource mediumblob NOT NULL,
 	no_auto_pb tinyint(4) unsigned DEFAULT '0' NOT NULL,
-	
+
 	PRIMARY KEY (uid),
 	KEY parent (pid),
 	KEY t3ver_oid (t3ver_oid,t3ver_wsid),
@@ -431,7 +431,7 @@ CREATE TABLE tx_cal_location (
 	shared_user_cnt int(11) unsigned DEFAULT '0' NOT NULL,
 	latitude double default '0',
   	longitude double default '0',
-	
+
 	t3ver_oid int(11) DEFAULT '0' NOT NULL,
 	t3ver_id int(11) DEFAULT '0' NOT NULL,
 	t3ver_wsid int(11) DEFAULT '0' NOT NULL,
@@ -447,7 +447,7 @@ CREATE TABLE tx_cal_location (
 	l18n_parent int(11) DEFAULT '0' NOT NULL,
 	l18n_diffsource mediumblob NOT NULL,
 	no_auto_pb tinyint(4) unsigned DEFAULT '0' NOT NULL,
-	
+
 	PRIMARY KEY (uid),
 	KEY parent (pid),
 	KEY t3ver_oid (t3ver_oid,t3ver_wsid),
@@ -502,7 +502,7 @@ CREATE TABLE tx_cal_attendee (
 	fe_group_id int(11) unsigned DEFAULT '0' NOT NULL,
 	attendance varchar(16) DEFAULT '' NOT NULL,
 	status varchar(12) DEFAULT '' NOT NULL,
-	
+
 	t3ver_oid int(11) DEFAULT '0' NOT NULL,
 	t3ver_id int(11) DEFAULT '0' NOT NULL,
 	t3ver_wsid int(11) DEFAULT '0' NOT NULL,
@@ -513,7 +513,7 @@ CREATE TABLE tx_cal_attendee (
 	t3ver_tstamp int(11) DEFAULT '0' NOT NULL,
 	t3ver_move_id int(11) DEFAULT '0' NOT NULL,
 	t3_origuid int(11) DEFAULT '0' NOT NULL,
-	
+
 	PRIMARY KEY (uid),
 	KEY parent (pid),
 	KEY t3ver_oid (t3ver_oid,t3ver_wsid),
@@ -584,7 +584,7 @@ CREATE TABLE tx_cal_event_deviation (
 	t3ver_tstamp int(11) DEFAULT '0' NOT NULL,
 	t3ver_move_id int(11) DEFAULT '0' NOT NULL,
 	t3_origuid int(11) DEFAULT '0' NOT NULL,
-	
+
 	sys_language_uid int(11) DEFAULT '0' NOT NULL,
 	l18n_parent int(11) DEFAULT '0' NOT NULL,
 	l18n_diffsource mediumblob NOT NULL,
@@ -603,7 +603,7 @@ CREATE TABLE tx_cal_cache (
     identifier varchar(128) DEFAULT '' NOT NULL,
     content text NOT NULL,
 	crdate int(11) DEFAULT '0' NOT NULL,
-	lifetime int(11) DEFAULT '0' NOT NULL,    
+	lifetime int(11) DEFAULT '0' NOT NULL,
   	PRIMARY KEY (id),
   	KEY cache_id (identifier)
 ) ENGINE=InnoDB;
