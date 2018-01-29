@@ -947,11 +947,17 @@ if (\TYPO3\CMS\Core\Utility\GeneralUtility::inList ($GLOBALS['TYPO3_CONF_VARS'] 
 			'description' => 'cal reminder scheduler integration',
 			'additionalFields' => ''
 	);
-	$GLOBALS ['TYPO3_CONF_VARS'] ['SC_OPTIONS'] ['scheduler'] ['tasks'] ['TYPO3\\CMS\\Cal\\Cron\\IndexerScheduler'] = Array (
+	$GLOBALS ['TYPO3_CONF_VARS'] ['SC_OPTIONS'] ['scheduler'] ['tasks'] ['TYPO3\\CMS\\Cal\\Cron\\IndexScheduler'] = Array (
 			'extension' => $_EXTKEY,
 			'title' => 'Indexer for recurring events',
 			'description' => 'Indexing recurring events',
 			'additionalFields' => 'TYPO3\\CMS\\Cal\\Cron\\IndexerSchedulerAdditionalFieldProvider'
+	);
+	$GLOBALS ['TYPO3_CONF_VARS'] ['SC_OPTIONS'] ['scheduler'] ['tasks'] ['TYPO3\\CMS\\Cal\\Cron\\IndexAllScheduler'] = Array (
+			'extension' => $_EXTKEY,
+			'title' => 'Indexer for recurring events',
+			'description' => 'Indexing recurring events',
+			'additionalFields' => 'TYPO3\\CMS\\Cal\\Cron\\IndexAllSchedulerAdditionalFieldProvider'
 	);
 }
 
