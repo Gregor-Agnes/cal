@@ -33,7 +33,7 @@ use TYPO3\CMS\Core\Utility\MathUtility;
 class TreeView {
 	function getTreeList($uid, $recursive, &$ids) {
 		if (intval ($uid) > 0 && $recursive > - 1) {
-			
+
 			array_push ($ids, $uid);
 			$res = $GLOBALS ['TYPO3_DB']->exec_SELECTquery ('uid', 'pages', 'pid = ' . intval ($uid) . ' AND deleted = 0');
 			if ($res) {
@@ -45,7 +45,7 @@ class TreeView {
 			}
 		}
 	}
-	
+
 	/**
 	 * Generation of TCEform elements of the type "select"
 	 * This will render a selector box element, or possibly a special construction with two selector boxes.
@@ -63,29 +63,29 @@ class TreeView {
 		$config = $PA ['fieldConf'] ['config'];
 		$cfgArr = GeneralUtility::xml2array ($PA ['row'] ['pi_flexform']);
 		$selectedCalendars = array ();
-		
+
 		if (is_array ($cfgArr) && is_array ($cfgArr ['data'] ['s_Cat'] ['lDEF']) && is_array ($cfgArr ['data'] ['s_Cat'] ['lDEF'] ['calendarSelection'])) {
 			$selectedCalendars = GeneralUtility::trimExplode (',', $cfgArr ['data'] ['s_Cat'] ['lDEF'] ['calendarSelection'] ['vDEF'], 1);
 		}
-		
+
 		// it seems TCE has a bug and do not work correctly with '1'
 		$config ['maxitems'] = ($config ['maxitems'] == 2) ? 1 : $config ['maxitems'];
 		$row = $PA ['row'];
 		$pidList = array ();
-		
+
 		$isPluginFlexform = false;
 		$isBeUserForm = false;
 		$isCategoryForm = false;
 		if ($field == 'pi_flexform') {
 			$isPluginFlexform = true;
 		}
-		
+
 		if ($isPluginFlexform) {
 			$pagesEntry = $row ['pages'];
 			$recursiveEntry = $row ['recursive'];
-			
+
 			$pagesEntryArray = array_unique (explode (',', $pagesEntry));
-			
+
 			foreach ($pagesEntryArray as $id) {
 				preg_match ('/[a-zA-Z]*_([0-9]*)|[a-zA-Z0-9]*/', $id, $idArray);
 				$list = array ();
@@ -93,12 +93,12 @@ class TreeView {
 				if ($list)
 					$pidList [] = implode (',', $list);
 			}
-			
+
 			$pidList = implode (',', $pidList);
 			if ($pidList == '')
 				$pidList = '0';
 		}
-		
+
 		if ($GLOBALS ['TYPO3_CONF_VARS'] ['EXT'] ['extConf'] ['tx_cal']) { // get cal extConf array
 			$confArr = unserialize ($GLOBALS ['TYPO3_CONF_VARS'] ['EXT'] ['extConf'] ['tx_cal']);
 		}
@@ -110,29 +110,29 @@ class TreeView {
 		if ($GLOBALS ['BE_USER']->getTSConfigVal ('options.useListOfAllowedItems') && ! $GLOBALS ['BE_USER']->isAdmin ()) {
 			$notAllowedItems = $this->getNotAllowedItems ($PA, $SPaddWhere);
 		}
-		
+
 		// get default items
 		$defItems = array ();
 		if (is_array ($config ['items']) && $table == 'tt_content' && $row ['CType'] == 'list' && $row ['list_type'] == 'cal_controller' && $field == 'pi_flexform') {
 			reset ($config ['items']);
-			while (list ($itemName, $itemValue) = each ($config ['items'])) {
-				if ($itemValue [0]) {
-					$ITitle = $this->pObj->sL ($itemValue [0]);
-					$defItems [] = '<a href="#" onclick="setFormValueFromBrowseWin(\'data[' . $table . '][' . $row ['uid'] . '][' . $field . '][data][sDEF][lDEF][categorySelection][vDEF]\',' . $itemValue [1] . ',\'' . $ITitle . '\'); return false;" style="text-decoration:none;">' . $ITitle . '</a>';
-				}
-			}
+			foreach ($config['items'] as $itemName => $itemValue) {
+                if ($itemValue [0]) {
+                    $ITitle = $this->pObj->sL ($itemValue [0]);
+                    $defItems [] = '<a href="#" onclick="setFormValueFromBrowseWin(\'data[' . $table . '][' . $row ['uid'] . '][' . $field . '][data][sDEF][lDEF][categorySelection][vDEF]\',' . $itemValue [1] . ',\'' . $ITitle . '\'); return false;" style="text-decoration:none;">' . $ITitle . '</a>';
+                }
+            }
 		}
-		
+
 		$allowAllCalendars = true;
-		
+
 		$be_userCategories = array (
-				0 
+				0
 		);
 		$be_userCalendars = array (
-				0 
+				0
 		);
 		$calWhere = '';
-		
+
 		if (! $GLOBALS ['BE_USER']->user ['admin'] && $field == 'pi_flexform') {
 			if (is_array ($GLOBALS ['BE_USER']->userGroups)) {
 				if (! $GLOBALS ['BE_USER']->user ['admin']) {
@@ -146,26 +146,26 @@ class TreeView {
 					}
 				}
 			}
-			
+
 			if ($GLOBALS ['BE_USER']->user ['tx_cal_enable_accesscontroll']) {
 				$allowAllCalendars = false;
 				if ($GLOBALS ['BE_USER']->user ['tx_cal_calendar']) {
 					$be_userCalendars = array_merge ($be_userCalendars, GeneralUtility::trimExplode (',', $GLOBALS ['BE_USER']->user ['tx_cal_calendar'], 1));
 				}
 			}
-			
+
 			if (! $allowAllCalendars) {
 				$calWhere == '' ? $calWhere .= ' ' : $calWhere .= ' AND';
 				$calWhere .= ' uid IN (' . implode (',', $be_userCalendars) . ')';
 			}
 		}
-		
+
 		if ((TYPO3_MODE == 'BE') || ($GLOBALS ['TSFE']->beUserLogin && $GLOBALS ['BE_USER']->extAdmEnabled)) {
 			$enableFields = BackendUtility::BEenableFields ('tx_cal_calendar') . ' AND tx_cal_calendar.deleted = 0';
 		} else {
 			$enableFields = $this->cObj->enableFields ('tx_cal_calendar');
 		}
-		
+
 		$calWhere .= $calWhere == '' ? '0=0' . $enableFields : $enableFields;
 		if ($isPluginFlexform) {
 			$calWhere .= ' AND pid IN (' . $pidList . ')';
@@ -186,25 +186,25 @@ class TreeView {
 				$itemArray [] = array (
 						$calrow ['title'],
 						$calrow ['uid'],
-						'' 
+						''
 				);
 			}
 			$GLOBALS ['TYPO3_DB']->sql_free_result ($calres);
 		}
-		
+
 		$test = new \TYPO3\CMS\Backend\Form\FormEngine ();
 		$test->initDefaultBEmode ();
-		
+
 		$disabled = '';
 		if ($this->renderReadonly || $config ['readOnly']) {
 			$disabled = ' disabled="disabled"';
 		}
-		
+
 		// Setting this hidden field (as a flag that JavaScript can read out)
 		if (! $disabled) {
 			$item .= '<input type="hidden" name="' . $PA ['itemFormElName'] . '_mul" value="' . ($config ['multiple'] ? 1 : 0) . '" />';
 		}
-		
+
 		// Set max and min items:
 		if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger (TYPO3_version) >= 4006000) {
 			$maxitems = MathUtility::forceIntegerInRange ($config ['maxitems'], 0);
@@ -221,9 +221,9 @@ class TreeView {
 		$test->requiredElements [$PA ['itemFormElName']] = array (
 				$minitems,
 				$maxitems,
-				'imgName' => $table . '_' . $row ['uid'] . '_' . $field 
+				'imgName' => $table . '_' . $row ['uid'] . '_' . $field
 		);
-		
+
 		// Get "removeItems":
 		$removeItems = GeneralUtility::trimExplode (',', $PA ['fieldTSConfig'] ['removeItems'], 1);
 		if (! $disabled) {
@@ -236,7 +236,7 @@ class TreeView {
 				}
 				$opt [] = '<option value="' . htmlspecialchars ($p [1]) . '"' . ($styleAttrValue ? ' style="' . htmlspecialchars ($styleAttrValue) . '"' : '') . '>' . htmlspecialchars ($p [0]) . '</option>';
 			}
-			
+
 			// Put together the selector box:
 			$selector_itemListStyle = isset ($config ['itemListStyle']) ? ' style="' . htmlspecialchars ($config ['itemListStyle']) . '"' : ' style="' . $this->defaultMultipleSelectorStyle . '"';
 			$size = intval ($config ['size']);
@@ -251,11 +251,11 @@ class TreeView {
 				$sOnChange = 'setFormValueFromBrowseWin(\'' . $PA ['itemFormElName'] . '\',this.options[this.selectedIndex].value,this.options[this.selectedIndex].text); ';
 			}
 			$sOnChange .= implode ('', $PA ['fieldChangeFunc']);
-			
+
 			$width = 280;
 			// hardcoded: 16 is the height of the icons
 			$height = $size * 16;
-				
+
 			$divStyle = 'position:relative; left:0px; top:0px; height:' . $height . 'px; width:' . $width . 'px;border:solid 1px;overflow:auto;background:#fff;margin-bottom:5px;';
 			$itemsToSelect = '<div  name="' . $PA ['itemFormElName'] . '_selTree" style="' . htmlspecialchars ($divStyle) . '">';
 			$itemsToSelect .= '<select name="' . $PA ['itemFormElName'] . '_sel"' . $test->insertDefStyle ('select') . ($size ? ' size="' . $size . '"' : '') . ' style="width:' . $width .'px" onchange="' . htmlspecialchars ($sOnChange) . '"' . $PA ['onFocus'] . $selector_itemListStyle . '>
@@ -264,7 +264,7 @@ class TreeView {
 				</select>';
 			$itemsToSelect .= '</div>';
 		}
-		
+
 		if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger (TYPO3_version) >= 7000000) {
 			$params = array (
 					'size' => $config ['size'],
@@ -275,11 +275,11 @@ class TreeView {
 					'info' => '',
 					'headers' => array (
 							'selector' => $test->getLL ('l_selected') . ':<br />',
-							'items' => $test->getLL ('l_items') . ':<br />' 
+							'items' => $test->getLL ('l_items') . ':<br />'
 					),
 					'noBrowser' => 1,
 					'rightbox' => $itemsToSelect,
-					'readOnly' => $disabled 
+					'readOnly' => $disabled
 			);
 		} else if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger (TYPO3_version) >= 4006000) {
 			$params = array (
@@ -291,11 +291,11 @@ class TreeView {
 					'info' => '',
 					'headers' => array (
 							'selector' => $test->getLL ('l_selected') . ':<br />',
-							'items' => $test->getLL ('l_items') . ':<br />' 
+							'items' => $test->getLL ('l_items') . ':<br />'
 					),
 					'noBrowser' => 1,
 					'thumbnails' => $itemsToSelect,
-					'readOnly' => $disabled 
+					'readOnly' => $disabled
 			);
 		} else {
 			$params = array (
@@ -307,11 +307,11 @@ class TreeView {
 					'info' => '',
 					'headers' => array (
 							'selector' => $test->getLL ('l_selected') . ':<br />',
-							'items' => $test->getLL ('l_items') . ':<br />' 
+							'items' => $test->getLL ('l_items') . ':<br />'
 					),
 					'noBrowser' => 1,
 					'thumbnails' => $itemsToSelect,
-					'readOnly' => $disabled 
+					'readOnly' => $disabled
 			);
 		}
 		if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger (TYPO3_version) >= 7000000) {
@@ -320,10 +320,10 @@ class TreeView {
 		} else {
 			$item .= $test->dbFileIcons ($PA ['itemFormElName'], '', '', $selectedCalendars, '', $params, $PA ['onFocus']);
 		}
-		
+
 		return $item;
 	}
-	
+
 	/**
 	 * Generation of TCEform elements of the type "select"
 	 * This will render a selector box element, or possibly a special construction with two selector boxes.
@@ -340,7 +340,7 @@ class TreeView {
 		$field = $PA ['field'];
 		$row = $PA ['row'];
 		$config = $PA ['fieldConf'] ['config'];
-		
+
 		$isPluginFlexform = false;
 		$isBeUserForm = false;
 		$isBeGroupsForm = false;
@@ -349,13 +349,13 @@ class TreeView {
 		$calendarMode = 0;
 		if ($field == 'pi_flexform') {
 			$isPluginFlexform = true;
-			
+
 			if ($PA ['row'] ['pi_flexform']) {
 				$cfgArr = GeneralUtility::xml2array ($PA ['row'] ['pi_flexform']);
 			} else {
 				$cfgArr = array ();
 			}
-			
+
 			if (is_array ($cfgArr) && is_array ($cfgArr ['data'] ['s_Cat'] ['lDEF']) && is_array ($cfgArr ['data'] ['s_Cat'] ['lDEF'] ['calendarSelection'])) {
 				$selectedCalendars = GeneralUtility::intExplode (',', $cfgArr ['data'] ['s_Cat'] ['lDEF'] ['calendarSelection'] ['vDEF']);
 			}
@@ -372,9 +372,9 @@ class TreeView {
 		if ($table == 'be_groups') {
 			$isBeGroupsForm = true;
 		}
-		
+
 		if ($row ['calendar_id'] == 0 && ! $isCategoryForm && ! $isPluginFlexform && ! $isBeUserForm && ! $isBeGroupsForm) {
-			
+
 			/* Get the records, with access restrictions and all that good stuff applied. */
 			$tempCalRes = \TYPO3\CMS\Cal\Backend\TCA\ItemsProcFunc::getSQLResource ('tx_cal_calendar', '', '', '', '1');
 			if ($tempCalRes) {
@@ -384,15 +384,15 @@ class TreeView {
 				$GLOBALS ['TYPO3_DB']->sql_free_result ($tempCalRes);
 			}
 		}
-		
+
 		$pidList = array ();
-		
+
 		if ($isPluginFlexform) {
 			$pagesEntry = $row ['pages'];
 			$recursiveEntry = $row ['recursive'];
-			
+
 			$pagesEntryArray = array_unique (explode (',', $pagesEntry));
-			
+
 			foreach ($pagesEntryArray as $id) {
 				preg_match ('/[a-zA-Z]*_([0-9]*)|[a-zA-Z0-9]*/', $id, $idArray);
 				$list = array ();
@@ -400,34 +400,34 @@ class TreeView {
 				if ($list)
 					$pidList [] = implode (',', $list);
 			}
-			
+
 			$pidList = implode (',', $pidList);
 			if ($pidList == '')
 				$pidList = '0';
 		}
-		
+
 		$this->pObj = &$PA ['pObj'];
-		
+
 		// Field configuration from TCA:
 		$config = $PA ['fieldConf'] ['config'];
 		// it seems TCE has a bug and do not work correctly with '1'
 		$config ['maxitems'] = ($config ['maxitems'] == 2) ? 1 : $config ['maxitems'];
-		
+
 		// Getting the selector box items from the system
 		$selItems = $this->pObj->addSelectOptionsToItemArray ($this->pObj->initItemArray ($PA ['fieldConf']), $PA ['fieldConf'], $this->pObj->setTSconfig ($table, $row), $field);
 		$selItems = $this->pObj->addItems ($selItems, $PA ['fieldTSConfig'] ['addItems.']);
 		// f ($config['itemsProcFunc']) $selItems = $this->pObj->procItems($selItems,$PA['fieldTSConfig']['itemsProcFunc.'],$config,$table,$row,$field);
-		
+
 		// Possibly remove some items:
 		$removeItems = GeneralUtility::trimExplode (',', $PA ['fieldTSConfig'] ['removeItems'], 1);
-		
+
 		foreach ($selItems as $tk => $p) {
 			if (in_array ($p [1], $removeItems)) {
 				unset ($selItems [$tk]);
 			} else if (isset ($PA ['fieldTSConfig'] ['altLabels.'] [$p [1]])) {
 				$selItems [$tk] [0] = $this->pObj->sL ($PA ['fieldTSConfig'] ['altLabels.'] [$p [1]]);
 			}
-			
+
 			// Removing doktypes with no access:
 			if ($table . '.' . $field == 'pages.doktype') {
 				if (! ($GLOBALS ['BE_USER']->isAdmin () || GeneralUtility::inList ($GLOBALS ['BE_USER']->groupData ['pagetypes_select'], $p [1]))) {
@@ -435,11 +435,11 @@ class TreeView {
 				}
 			}
 		}
-		
+
 		// Creating the label for the "No Matching Value" entry.
 		$nMV_label = isset ($PA ['fieldTSConfig'] ['noMatchingValue_label']) ? $this->pObj->sL ($PA ['fieldTSConfig'] ['noMatchingValue_label']) : '[ ' . $this->pObj->getLL ('l_noMatchingValue') . ' ]';
 		$nMV_label = @sprintf ($nMV_label, $PA ['itemFormElValue']);
-		
+
 		// Prepare some values:
 		$maxitems = intval ($config ['maxitems']);
 		$minitems = intval ($config ['minitems']);
@@ -489,12 +489,12 @@ class TreeView {
 					}
 					$GLOBALS ['TYPO3_DB']->sql_free_result ($catres);
 				}
-				
+
 				if ($na) {
 					$this->NA_Items = '<table class="warningbox" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><img src="gfx/icon_fatalerror.gif" class="absmiddle" alt="" height="16" width="18">SAVING DISABLED!! <br />' . ($row ['l18n_parent'] && $row ['sys_language_uid'] ? 'The translation original of this' : 'This') . ' record has the following categories assigned that are not defined in your BE usergroup: ' . implode ($NACats, chr (10)) . '</td></tr></tbody></table>';
 				}
 				$item = implode ($categories, chr (10));
-				
+
 				if ($item) {
 					$item = 'Categories from the translation original of this record:<br />' . $item;
 				} else {
@@ -503,7 +503,7 @@ class TreeView {
 				$item = '<div class="typo3-TCEforms-originalLanguageValue">' . $item . '</div>';
 			} else { // build tree selector
 				$item .= '<input type="hidden" name="' . $PA ['itemFormElName'] . '_mul" value="' . ($config ['multiple'] ? 1 : 0) . '" />';
-				
+
 				// Set max and min items:
 				if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger (TYPO3_version) >= 4006000) {
 					$maxitems = MathUtility::forceIntegerInRange ($config ['maxitems'], 0);
@@ -520,29 +520,29 @@ class TreeView {
 				$this->pObj->requiredElements [$PA ['itemFormElName']] = array (
 						$minitems,
 						$maxitems,
-						'imgName' => $table . '_' . $row ['uid'] . '_' . $field 
+						'imgName' => $table . '_' . $row ['uid'] . '_' . $field
 				);
-				
+
 				// *************************************************
 				// ********************** START ********************
 				// *************************************************
 				if ($config ['treeView'] and $config ['foreign_table']) {
-					
+
 					$confArr = unserialize ($GLOBALS ['TYPO3_CONF_VARS'] ['EXT'] ['extConf'] ['cal']);
 					$treeOrderBy = $confArr ['treeOrderBy'] ? $confArr ['treeOrderBy'] : 'uid';
-					
+
 					if ($GLOBALS ['BE_USER']->getTSConfigVal ('options.useListOfAllowedItems') && ! $GLOBALS ['BE_USER']->isAdmin ()) {
-						
+
 						$notAllowedItems = $this->getNotAllowedItems ($PA, $SPaddWhere);
 					}
-					
+
 					if ($table == 'be_users' || $table == 'be_groups') {
-						
+
 						$allowAllCategories = true;
 						$allowAllCalendars = true;
 						$be_userCategories = array ();
 						$be_userCalendars = array ();
-						
+
 						if ($row ['tx_cal_enable_accesscontroll'] && $row ['tx_cal_calendar']) {
 							$allowedCalendarIds = GeneralUtility::intExplode (',', $row ['tx_cal_calendar']);
 							$allowedCalendarIds [] = 0;
@@ -550,24 +550,24 @@ class TreeView {
 							$calWhere = ' AND tx_cal_calendar.uid in (' . implode (',', $allowedCalendarIds) . ')';
 						}
 					} else {
-						
+
 						// get default items
 						$defItems = array ();
 						if (is_array ($config ['items']) && $table == 'tt_content' && $row ['CType'] == 'list' && $row ['list_type'] == 'cal_controller' && $field == 'pi_flexform') {
 							reset ($config ['items']);
-							while (list ($itemName, $itemValue) = each ($config ['items'])) {
+                            foreach ($config['items'] as $itemName => $itemValue) {
 								if ($itemValue [0]) {
 									$ITitle = $this->pObj->sL ($itemValue [0]);
 									$defItems [] = '<a href="#" onclick="setFormValueFromBrowseWin(\'data[' . $table . '][' . $row ['uid'] . '][' . $field . '][data][sDEF][lDEF][categorySelection][vDEF]\',' . $itemValue [1] . ',\'' . $ITitle . '\'); return false;" style="text-decoration:none;">' . $ITitle . '</a>';
 								}
 							}
 						}
-						
+
 						$allowAllCategories = true;
 						$allowAllCalendars = true;
 						$be_userCategories = array ();
 						$be_userCalendars = array ();
-						
+
 						if ($row ['calendar_id'] > 0) {
 							if ($isCategoryForm) {
 								$catWhere = ' AND tx_cal_category.calendar_id IN (' . $row ['calendar_id'] . ')';
@@ -575,11 +575,11 @@ class TreeView {
 								$catWhere = ' AND tx_cal_category.calendar_id IN (0,' . $row ['calendar_id'] . ')';
 							}
 							$calWhere = ' AND tx_cal_calendar.uid IN (0,' . $row ['calendar_id'] . ')';
-							
+
 							if ($table != 'tx_cal_event') {
 								$notAllowedItems [] = $row ['uid'];
 							}
-							
+
 							if (! $GLOBALS ['BE_USER']->user ['admin']) {
 								if ($GLOBALS ['BE_USER']->user ['tx_cal_enable_accesscontroll']) {
 									$be_userCategories = GeneralUtility::trimExplode (',', $GLOBALS ['BE_USER']->user ['tx_cal_category'], 1);
@@ -599,11 +599,11 @@ class TreeView {
 										}
 									}
 								}
-								
+
 								if ($be_userCategories [0]) {
 									$allowAllCategories = false;
 								}
-								
+
 								if ($be_userCalendars [0]) {
 									$allowAllCalendars = false;
 								}
@@ -612,13 +612,13 @@ class TreeView {
 							$allowAllCalendars = false;
 							$allowAllCategories = false;
 							$be_userCategories = array (
-									0 
+									0
 							);
 							if ($GLOBALS ['BE_USER']->user ['tx_cal_category']) {
 								$be_userCategories = GeneralUtility::trimExplode (',', $GLOBALS ['BE_USER']->user ['tx_cal_category'], 1);
 							}
 							$be_userCalendars = array (
-									0 
+									0
 							);
 							if ($GLOBALS ['BE_USER']->user ['tx_cal_calendar']) {
 								$be_userCalendars = GeneralUtility::trimExplode (',', $GLOBALS ['BE_USER']->user ['tx_cal_calendar'], 1);
@@ -644,7 +644,7 @@ class TreeView {
 								$calWhere = ' AND tx_cal_calendar.uid in (' . implode (',', $selectedCalendars) . ')';
 							} else { // $calendarMode==2
 								$selectedCalendars = array_diff ($selectedCalendars, Array (
-										0 
+										0
 								));
 								if (count ($selectedCalendars) > 0) {
 									$catWhere = ' AND tx_cal_category.calendar_id not in (' . implode (',', $selectedCalendars) . ')';
@@ -662,21 +662,21 @@ class TreeView {
 					} else {
 						$treeViewObj = new \TYPO3\CMS\Cal\Backend\TCA\TceFuncSelectTreeView();
 					}
-					
+
 					if ((TYPO3_MODE == 'BE') || ($GLOBALS ['TSFE']->beUserLogin && $GLOBALS ['BE_USER']->extAdmEnabled)) {
 						$enableFields = BackendUtility::BEenableFields ('tx_cal_category') . ' AND tx_cal_category.deleted = 0';
 					} else {
 						$enableFields = $this->cObj->enableFields ('tx_cal_category');
 					}
-					
+
 					$catWhere .= $enableFields;
-					
+
 					if ($isPluginFlexform) {
 						$catWhere .= ' AND pid IN (' . $pidList . ')';
 					}
-					
+
 					$catres = $GLOBALS ['TYPO3_DB']->exec_SELECTquery ('tx_cal_category.uid, tx_cal_category.title, tx_cal_category.calendar_id, tx_cal_category.parent_category', 'tx_cal_category', '1=1' . $catWhere, $treeOrderBy);
-					
+
 					$categoryById = array ();
 					$categoryByCalendarId = array ();
 					$categoryByParentId = array ();
@@ -691,7 +691,7 @@ class TreeView {
 									$catrow = $tempRow [0];
 								}
 							}
-							
+
 							if (($allowAllCalendars && $allowAllCategories) || (($catrow ['calendar_id'] == 0 || in_array ($catrow ['calendar_id'], $be_userCalendars)) && in_array ($catrow ['uid'], $be_userCategories))) {
 								$categoryById [$catrow ['uid']] = $catrow;
 								$categoryByCalendarId [$catrow ['calendar_id']] [] = $catrow;
@@ -703,13 +703,13 @@ class TreeView {
 						}
 						$GLOBALS ['TYPO3_DB']->sql_free_result ($catres);
 					}
-					
+
 					$ids = array ();
 					foreach ($categoryById as $catRow) {
 						$ids = array_merge ($ids, $this->checkChildIds ($catRow ['uid'], $allCategoryByParentId));
 					}
 					$ids = array_unique ($ids);
-					
+
 					foreach ($ids as $id) {
 						$categoryById [$id] = $allCategoryById [$id];
 						$categoryByCalendarId [$allCategoryById [$id] ['calendar_id']] [] = $allCategoryById [$id];
@@ -726,7 +726,7 @@ class TreeView {
 						$enableFields = $this->cObj->enableFields ('tx_cal_calendar');
 					}
 					$calWhere .= $enableFields;
-					
+
 					if ($isPluginFlexform) {
 						$calWhere .= ' AND pid IN (' . $pidList . ')';
 					}
@@ -738,9 +738,9 @@ class TreeView {
 						}
 						$GLOBALS ['TYPO3_DB']->sql_free_result ($calres);
 					}
-					
+
 					$dataArray = array ();
-					
+
 					if (count ($categoryByCalendarId [0]) > 0) {
 						$treeViewObj->MOUNTS [] = 'cal:global';
 						$calArray = array ();
@@ -750,7 +750,7 @@ class TreeView {
 							if ($globalCat ['parent_category'] == 0 || ($isPluginFlexform && ! $categoryById [$globalCat ['parent_category']])) {
 								$childArray = array (
 										'title' => $globalCat ['title'],
-										'uid' => $globalCat ['uid'] 
+										'uid' => $globalCat ['uid']
 								);
 								$this->addChildren ($globalCat ['uid'], $childArray, $categoryById, $categoryByParentId, $treeViewObj->subLevelID, $notAllowedItems);
 								$calArray [$treeViewObj->subLevelID] [$globalCat ['uid']] = $childArray;
@@ -758,7 +758,7 @@ class TreeView {
 						}
 						$dataArray ['cal:global'] = $calArray;
 					}
-					
+
 					unset ($categoryByCalendarId [0]);
 					foreach ($calendars as $calUid => $calendar) {
 						$treeViewObj->MOUNTS [] = 'cal:' . $calUid;
@@ -771,7 +771,7 @@ class TreeView {
 								if ($category ['parent_category'] == 0 || ($isPluginFlexform && ! $categoryById [$category ['parent_category']])) {
 									$childArray = array (
 											'title' => $category ['title'],
-											'uid' => $category ['uid'] 
+											'uid' => $category ['uid']
 									);
 									$this->addChildren ($category ['uid'], $childArray, $categoryById, $categoryByParentId, $treeViewObj->subLevelID, $notAllowedItems);
 									$calArray [$treeViewObj->subLevelID] [$category ['uid']] = $childArray;
@@ -780,14 +780,14 @@ class TreeView {
 						}
 						$dataArray ['cal:' . $calUid] = $calArray;
 					}
-					
+
 					// ###################
-					
+
 					// $treeViewObj->table = $config['foreign_table'];
 					$treeViewObj->table = 'tx_cal_category';
 					$treeViewObj->init ($SPaddWhere);
 					$treeViewObj->backPath = $this->pObj->backPath;
-					
+
 					$treeViewObj->setDataFromArray ($dataArray);
 					// $treeViewObj->parentField = $GLOBALS['TCA'][$config['foreign_table']]['ctrl']['treeParentField'];
 					// $treeViewObj->parentField = 'parent_category';
@@ -798,12 +798,12 @@ class TreeView {
 					$treeViewObj->expandFirst = 1;
 					$treeViewObj->fieldArray = array (
 							'uid',
-							'title' 
+							'title'
 					); // those fields will be filled to the array $treeViewObj->tree
-					
+
 					$treeViewObj->ext_IconMode = '1'; // no context menu on icons
 					$treeViewObj->title = $GLOBALS ['LANG']->sL ($GLOBALS ['TCA'] [$config ['foreign_table']] ['ctrl'] ['title']);
-					
+
 					$treeViewObj->TCEforms_itemFormElName = $PA ['itemFormElName'];
 					if ($table == $config ['foreign_table']) {
 						$treeViewObj->TCEforms_nonSelectableItemsArray [] = $row ['uid'];
@@ -813,21 +813,21 @@ class TreeView {
 							$treeViewObj->TCEforms_nonSelectableItemsArray [] = $k;
 						}
 					}
-					
+
 					// render tree html
 					$lockBeUserToDBmounts = $GLOBALS['TYPO3_CONF_VARS']['BE']['lockBeUserToDBmounts'];
 					$GLOBALS['TYPO3_CONF_VARS']['BE']['lockBeUserToDBmounts'] = 0;
 					$treeContent = $treeViewObj->getBrowsableTree();
 					$treeItemC = count($treeViewObj->dataLookup);
 					$GLOBALS['TYPO3_CONF_VARS']['BE']['lockBeUserToDBmounts'] = $lockBeUserToDBmounts;
-					
+
 					/*
 					 * if ($defItems[0]) { // add default items to the tree table. In this case the value [not categorized] $treeItemC += count($defItems); $treeContent .= '<table border="0" cellpadding="0" cellspacing="0"><tr> <td>'.$this->pObj->sL($config['itemsHeader']).'&nbsp;</td><td>'.implode($defItems,'<br />').'</td> </tr></table>'; }
 					 */
-					
+
 					// find recursive categories or "storagePid" related errors and if there are some, add a message to the $errorMsg array.
 					$errorMsg = $this->findRecursiveCategories ($PA, $row, $table, $storagePid, $treeViewObj->ids);
-					
+
 					$width = 280; // default width for the field with the category tree
 					if (intval ($confArr ['categoryTreeWidth'])) { // if a value is set in extConf take this one.
 						if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger (TYPO3_version) >= 4006000) {
@@ -838,7 +838,7 @@ class TreeView {
 					} elseif ($GLOBALS ['CLIENT'] ['BROWSER'] == 'msie') { // to suppress the unneeded horizontal scrollbar IE needs a width of at least 320px
 						$width = 320;
 					}
-					
+
 					if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger (TYPO3_version) >= 4006000) {
 						$config ['autoSizeMax'] = MathUtility::forceIntegerInRange ($config ['autoSizeMax'], 0);
 						$height = $config ['autoSizeMax'] ? MathUtility::forceIntegerInRange ($treeItemC + 2, MathUtility::forceIntegerInRange ($size, 1), $config ['autoSizeMax']) : $size;
@@ -848,15 +848,15 @@ class TreeView {
 					}
 					// hardcoded: 16 is the height of the icons
 					$height = $height * 16;
-					
+
 					$divStyle = 'position:relative; left:0px; top:0px; height:' . $height . 'px; width:' . $width . 'px;border:solid 1px;overflow:auto;background:#fff;margin-bottom:5px;';
 					$thumbnails = '<div  name="' . $PA ['itemFormElName'] . '_selTree" style="' . htmlspecialchars ($divStyle) . '">';
 					$thumbnails .= $treeContent;
 					$thumbnails .= '</div>';
 				} else {
-					
+
 					$sOnChange = 'setFormValueFromBrowseWin(\'' . $PA ['itemFormElName'] . '\',this.options[this.selectedIndex].value,this.options[this.selectedIndex].text); ' . implode ('', $PA ['fieldChangeFunc']);
-					
+
 					// Put together the select form with selected elements:
 					$selector_itemListStyle = isset ($config ['itemListStyle']) ? ' style="' . htmlspecialchars ($config ['itemListStyle']) . '"' : ' style="' . $this->pObj->defaultMultipleSelectorStyle . '"';
 					if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger (TYPO3_version) >= 4006000) {
@@ -864,7 +864,7 @@ class TreeView {
 					} else {
 						$size = $config ['autoSizeMax'] ? GeneralUtility::forceIntegerInRange (count ($itemArray) + 1, GeneralUtility::forceIntegerInRange ($size, 1), $config ['autoSizeMax']) : $size;
 					}
-					
+
 					$thumbnails = '<select style="width:150px;" name="' . $PA ['itemFormElName'] . '_sel"' . $this->pObj->insertDefStyle ('select') . ($size ? ' size="' . $size . '"' : '') . ' onchange="' . htmlspecialchars ($sOnChange) . '"' . $PA ['onFocus'] . $selector_itemListStyle . '>';
 					// thumbnails = '<select name="'.$PA['itemFormElName'].'_sel"'.$this->pObj->insertDefStyle('select').($size?' size="'.$size.'"':'').' onchange="'.htmlspecialchars($sOnChange).'"'.$PA['onFocus'].$selector_itemListStyle.'>';
 					foreach ($selItems as $p) {
@@ -872,10 +872,10 @@ class TreeView {
 					}
 					$thumbnails .= '</select>';
 				}
-				
+
 				// Perform modification of the selected items array:
 				$itemArray = GeneralUtility::trimExplode (',', $PA ['itemFormElValue'], 1);
-				
+
 				foreach ($itemArray as $tk => $tv) {
 					$tvP = explode ('|', $tv, 2);
 					if (in_array ($tvP [0], $removeItems) && ! $PA ['fieldTSConfig'] ['disableNoMatchingValueElement']) {
@@ -933,10 +933,10 @@ class TreeView {
 							'info' => '',
 							'headers' => array (
 									'selector' => $this->pObj->getLL ('l_selected') . ':<br />',
-									'items' => $this->pObj->getLL ('l_items') . ':<br />' 
+									'items' => $this->pObj->getLL ('l_items') . ':<br />'
 							),
 							'noBrowser' => 1,
-							'thumbnails' => $thumbnails 
+							'thumbnails' => $thumbnails
 					);
 				} else {
 					$params = array (
@@ -949,10 +949,10 @@ class TreeView {
 							'info' => '',
 							'headers' => array (
 									'selector' => $this->pObj->getLL ('l_selected') . ':<br />',
-									'items' => $this->pObj->getLL ('l_items') . ':<br />' 
+									'items' => $this->pObj->getLL ('l_items') . ':<br />'
 							),
 							'noBrowser' => 1,
-							'thumbnails' => $thumbnails 
+							'thumbnails' => $thumbnails
 					);
 				}
 				if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger (TYPO3_version) >= 7000000) {
@@ -963,18 +963,18 @@ class TreeView {
 				}
 				// Wizards:
 				$altItem = '<input type="hidden" name="' . $PA ['itemFormElName'] . '" value="' . htmlspecialchars ($PA ['itemFormElValue']) . '" />';
-				
+
 				if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger (TYPO3_version) >= 7000000) {
 					$treeHelperElement = new TreeHelperElement($this->pObj);
 					$item = $treeHelperElement->getRenderWizards(array (
 							$item,
-							$altItem 
+							$altItem
 					), $config ['wizards'], $table, $row, $field, $PA, $PA ['itemFormElName'], $specConf);
 					$item .= '<style>.t3-icon-blank {width: 18px;height: 30px;}</style>';
 				} else {
 					$item = $this->pObj->renderWizards (array (
 							$item,
-							$altItem 
+							$altItem
 					), $config ['wizards'], $table, $row, $field, $PA, $PA ['itemFormElName'], $specConf);
 				}
 			}
@@ -986,7 +986,7 @@ class TreeView {
 			foreach ($categoryByParentId [$uid] as $category) {
 				$childArray2 = array (
 						'title' => $category ['title'],
-						'uid' => $category ['uid'] 
+						'uid' => $category ['uid']
 				);
 				if (in_array($uid, $notAllowedItems)) {
 					$notAllowedItems [] = $category ['uid'];
@@ -1008,7 +1008,7 @@ class TreeView {
 		}
 		return $ids;
 	}
-	
+
 	/**
 	 * This function checks if there are categories selectable that are not allowed for this BE user and if the current record has
 	 * already categories assigned that are not allowed.
@@ -1026,7 +1026,7 @@ class TreeView {
 		$fTable = $PA ['fieldConf'] ['config'] ['foreign_table'];
 		// get list of allowed categories for the current BE user
 		$allowedItemsList = $GLOBALS ['BE_USER']->getTSConfigVal ('tt_newsPerms.' . $fTable . '.allowedItems');
-		
+
 		$itemArr = array ();
 		if ($allowedItemsList) {
 			// get all categories
@@ -1039,7 +1039,7 @@ class TreeView {
 				}
 				$GLOBALS ['TYPO3_DB']->sql_free_result ($res);
 			}
-			
+
 			if (! $PA ['row'] ['sys_language_uid'] && ! $PA ['row'] ['l18n_parent']) {
 				$catvals = explode (',', $PA ['row'] ['category']); // get categories from the current record
 				$notAllowedCats = array ();
@@ -1054,10 +1054,10 @@ class TreeView {
 				}
 			}
 		}
-		
+
 		return $itemArr;
 	}
-	
+
 	/**
 	 * detects recursive categories and returns an error message if recursive categories where found
 	 *
@@ -1094,7 +1094,7 @@ class TreeView {
 		}
 		if (strlen ($rcList)) {
 			$recursionMsg = 'RECURSIVE CATEGORIES DETECTED!! <br />This record has the following recursive categories assigned: ' . $rcList . '<br />Recursive categories will not be shown in the category tree and will therefore not be selectable. ';
-			
+
 			if ($table == 'tt_news') {
 				$recursionMsg .= 'To solve this problem mark these categories in the left select field, click on "edit category" and clear the field "parent category" of the recursive category.';
 			} else {
@@ -1105,7 +1105,7 @@ class TreeView {
 			$errorMsg [] = '<table class="warningbox" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><img src="gfx/icon_fatalerror.gif" class="absmiddle" alt="" height="16" width="18">' . $recursionMsg . '</td></tr></tbody></table>';
 		return $errorMsg;
 	}
-	
+
 	/**
 	 * This function compares the selected categories ($catString) with the categories from the category tree ($treeIds).
 	 * If there are categories selected that are not present in the array $treeIds it assumes that those categories are
@@ -1137,7 +1137,7 @@ class TreeView {
 		}
 		return $rcList;
 	}
-	
+
 	/**
 	 * This functions displays the title field of a news record and checks if the record has categories assigned that are not allowed for the current BE user.
 	 * If there are non allowed categories an error message will be displayed.
@@ -1152,7 +1152,7 @@ class TreeView {
 		$table = $PA ['table'];
 		$field = $PA ['field'];
 		$row = $PA ['row'];
-		
+
 		if ($GLOBALS ['BE_USER']->getTSConfigVal ('options.useListOfAllowedItems') && ! $GLOBALS ['BE_USER']->isAdmin ()) {
 			$notAllowedItems = array ();
 			if ($GLOBALS ['TYPO3_CONF_VARS'] ['EXT'] ['extConf'] ['tt_news']) { // get tt_news extConf array
@@ -1177,7 +1177,7 @@ class TreeView {
 					}
 					$GLOBALS ['TYPO3_DB']->sql_free_result ($catres);
 				}
-				
+
 				if ($NACats [0]) {
 					$NA_Items = '<table class="warningbox" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><img src="gfx/icon_fatalerror.gif" class="absmiddle" alt="" height="16" width="18">SAVING DISABLED!! <br />' . ($row ['l18n_parent'] && $row ['sys_language_uid'] ? 'The translation original of this' : 'This') . ' record has the following categories assigned that are not defined in your BE usergroup: ' . implode ($NACats, chr (10)) . '</td></tr></tbody></table>';
 				}
