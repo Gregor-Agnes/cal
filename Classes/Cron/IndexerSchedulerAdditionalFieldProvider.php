@@ -35,34 +35,13 @@ class IndexerSchedulerAdditionalFieldProvider implements AdditionalFieldProvider
 	 */
 	public function getAdditionalFields(array &$taskInfo, $task, SchedulerModuleController $parentObject) {
 		$additionalFields = array();
-		$additionalFields['task_eventIndexer_eventFolder'] = $this->getEventFolderAdditionalField($taskInfo, $task, $parentObject);
 		$additionalFields['task_eventIndexer_typoscriptPage'] = $this->getTyposcriptPageAdditionalField($taskInfo, $task, $parentObject);
 		$additionalFields['task_eventIndexer_starttime'] = $this->getStarttimeAdditionalField($taskInfo, $task, $parentObject);
 		$additionalFields['task_eventIndexer_endtime'] = $this->getEndtimeAdditionalField($taskInfo, $task, $parentObject);
 		return $additionalFields;
 	}
 
-	/**
-	 * Add an input field for event folders.
-	 *
-	 * @param array $taskInfo Reference to the array containing the info used in the add/edit form
-	 * @param AbstractTask|NULL $task When editing, reference to the current task. NULL when adding.
-	 * @param SchedulerModuleController $parentObject Reference to the calling object (Scheduler's BE module)
-	 * @return array Array containing all the information pertaining to the additional fields
-	 */
-	protected function getEventFolderAdditionalField(array &$taskInfo, $task, SchedulerModuleController $parentObject) {
-		$fieldName = 'tx_scheduler[cal_eventIndexer_eventFolder]';
-		$fieldId = 'task_eventIndexer_eventFolder';
-		$fieldHtml = '<input type="text" name="' . $fieldName . '" ' . 'id="' . $fieldId . '" value="' . $task->eventFolder . '"/>';
-		$fieldConfiguration = array(
-			'code' => $fieldHtml,
-			'label' => 'LLL:EXT:cal/Resources/Private/Language/locallang_indexer.xml:tableHeader1',
-			'cshKey' => '',
-			'cshLabel' => $fieldId
-		);
-		return $fieldConfiguration;
-	}
-	
+
 	/**
 	 * Add an input field for the typoscript page.
 	 *
@@ -83,7 +62,7 @@ class IndexerSchedulerAdditionalFieldProvider implements AdditionalFieldProvider
 		);
 		return $fieldConfiguration;
 	}
-	
+
 	/**
 	 * Add an input field for the starttime.
 	 *
@@ -104,7 +83,7 @@ class IndexerSchedulerAdditionalFieldProvider implements AdditionalFieldProvider
 		);
 		return $fieldConfiguration;
 	}
-	
+
 	/**
 	 * Add an input field for the endtime.
 	 *
@@ -175,7 +154,7 @@ class IndexerSchedulerAdditionalFieldProvider implements AdditionalFieldProvider
 		}
 		return $validData;
 	}
-	
+
 	/**
 	 * Checks if starttime field is correct
 	 *
@@ -190,7 +169,7 @@ class IndexerSchedulerAdditionalFieldProvider implements AdditionalFieldProvider
 		}
 		return $validData;
 	}
-	
+
 	/**
 	 * Checks if endtime field is correct
 	 *
