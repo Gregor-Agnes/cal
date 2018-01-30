@@ -21,8 +21,6 @@ use TYPO3\CMS\Scheduler\Task\AbstractTask;
 class IndexAllScheduler extends AbstractTask
 {
 
-    public $typoscriptPage = '';
-
     public $starttime = '';
 
     public $endtime = '';
@@ -35,13 +33,13 @@ class IndexAllScheduler extends AbstractTask
         $starttime = $this->getTimeParsed($this->starttime)->format('%Y%m%d');
         $endtime = $this->getTimeParsed($this->endtime)->format('%Y%m%d');
 
-        $logger->info('Starting to index cal events from ' . $starttime . ' until ' . $endtime . '. Using Typoscript page ' . $this->typoscriptPage . ' as configuration reference.');
+        $logger->info('Starting to index cal events from ' . $starttime . ' until ' . $endtime . '.');
         /** @var \TYPO3\CMS\Cal\Utility\RecurrenceGenerator $rgc */
-        $rgc = GeneralUtility::makeInstance('TYPO3\\CMS\\Cal\\Utility\\RecurrenceGenerator', $this->typoscriptPage, $starttime, $endtime);
-        $logger->info('Working with all folders folder');
-        $rgc->truncateIndexTableAll();
+        $rgc = GeneralUtility::makeInstance('TYPO3\\CMS\\Cal\\Utility\\RecurrenceGenerator', null, $starttime, $endtime);
+        $logger->info('Working on all events.');
+        $rgc->cleanIndexTableAll();
         $logger->info('Starting to index... ');
-        $rgc->generateIndex();
+        $rgc->generateIndex(0);
         $logger->info('done.');
         $logger->info('IndexerScheduler done.');
 
