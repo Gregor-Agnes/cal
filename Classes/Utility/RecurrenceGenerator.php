@@ -103,7 +103,7 @@ class RecurrenceGenerator {
 	 *
 	 * @param int $pageId
 	 */
-	public function truncateIndexTableAll() {
+	public function cleanIndexTableAll() {
 		$this->getDatabaseConnection ()->exec_TRUNCATEquery(self::INDEX_TABLE);
 	}
 
